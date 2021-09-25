@@ -1,48 +1,90 @@
-import React, { FC, useEffect, useRef, useState } from 'react'
+import React, { FC, useMemo, useState } from 'react'
 import styled from 'styled-components'
 import { Slider } from '@geist-ui/react'
-import { useThrottle } from 'react-use'
 import { FileSelect } from '../../components/FileSelect'
-
-const SLIDER_MAX = 100
+import { Dimension, Video as _Video } from '../../components/Video'
+import { Canvas as _Canvas } from '../../components/Canvas'
+import { useMeasure } from 'react-use'
 
 export const Main: FC = () => {
-  const videoRef = useRef<HTMLVideoElement>(null)
+  const [videoSrc, setVideoSrc] = useState('/BigBuckBunny.mp4')
+  const [videoWidth, setVideoWidth] = useState<number>()
+  const [videoHeight, setVideoHeight] = useState<number>()
+  const handleLoadedDimension = (d: Dimension) => {
+    setVideoWidth(d.width)
+    setVideoHeight(d.height)
+  }
 
   const [sliderVal, setSliderVal] = useState<number>(1)
   const handleChangeSlider = (val: number) => {
     setSliderVal(val)
   }
 
-  const throttledSliderVal = useThrottle(sliderVal, 100)
-  useEffect(() => {
-    if (videoRef.current) {
-      const duration = videoRef.current.duration
-      const t = (duration * throttledSliderVal) / SLIDER_MAX
-      if (!t) {
-        videoRef.current.currentTime = 1
-        return
-      }
-      videoRef.current.currentTime = t
-    }
-  }, [throttledSliderVal])
-
   const handleClickFile = (file: File) => {
-    const url = URL.createObjectURL(file)
+    // reset
+    setVideoWidth(undefined)
+    setVideoHeight(undefined)
 
-    if (videoRef.current) {
-      videoRef.current.src = url
-    }
+    const url = URL.createObjectURL(file)
+    setVideoSrc(url)
   }
+
+  const [boardRef, { width: boardWidth, height: boardHeight }] =
+    useMeasure<HTMLDivElement>()
+
+  const { clipWidth, clipHeight } = useMemo(() => {
+    if (!boardWidth || !boardHeight) {
+      return {
+        clipWidth: undefined,
+        clipHeight: undefined,
+      }
+    }
+    if (!videoWidth || !videoHeight)
+      return {
+        clipWidth: boardWidth,
+        clipHeight: boardHeight,
+      }
+    // canvasの方が横長
+    if (boardWidth / boardHeight > videoWidth / videoHeight) {
+      return {
+        clipHeight: boardHeight,
+        clipWidth: Math.floor((videoWidth * boardHeight) / videoHeight),
+      }
+      // canvasの方が縦長
+    } else {
+      return {
+        clipWidth: boardWidth,
+        clipHeight: Math.floor((videoHeight * boardWidth) / videoWidth),
+      }
+    }
+  }, [boardHeight, boardWidth, videoHeight, videoWidth])
+
+  const viewBox = useMemo(() => {
+    if (!videoWidth || !videoHeight) return undefined
+    return `0, 0, ${videoWidth}, ${videoHeight}`
+  }, [videoHeight, videoWidth])
 
   return (
     <Container>
-      <Video src="/BigBuckBunny.mp4" ref={videoRef} />
+      <Board ref={boardRef}>
+        {clipWidth && clipHeight && (
+          <>
+            <Video
+              width={clipWidth}
+              height={clipHeight}
+              sliderVal={sliderVal}
+              src={videoSrc}
+              onLoadedDimension={handleLoadedDimension}
+            />
+            <Canvas width={clipWidth} height={clipHeight} viewBox={viewBox} />
+          </>
+        )}
+      </Board>
       <VideoControl>
         <Slider
           hideValue
           step={0.5}
-          max={SLIDER_MAX}
+          max={100}
           width="95%"
           value={sliderVal}
           onChange={handleChangeSlider}
@@ -57,11 +99,18 @@ const Container = styled.div`
   width: 100%;
 `
 
-const Video = styled.video`
-  width: 100%;
-  height: auto;
-  background-color: black;
+const Video = styled(_Video)<{ width: number; height: number }>`
+  position: absolute;
+  width: ${(props) => `${props.width}px`};
+  height: ${(props) => `${props.height}px`};
 `
+
+const Canvas = styled(_Canvas)<{ width: number; height: number }>`
+  position: absolute;
+  width: ${(props) => `${props.width}px`};
+  height: ${(props) => `${props.height}px`};
+`
+
 const VideoControl = styled.div`
   display: flex;
   align-items: center;
@@ -70,4 +119,8 @@ const VideoControl = styled.div`
   padding-bottom: 8px;
 `
 
-const InputFileContainer = styled.label``
+const Board = styled.div`
+  position: relative;
+  width: 100%;
+  height: 600px;
+`
