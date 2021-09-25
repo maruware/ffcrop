@@ -1,0 +1,8 @@
+{
+  "name": "crop-rect",
+  "version": "0.0.1",
+  "main": "index.js",
+  "repository": "ssh://git@github.com/maruware/crop-rect.git",
+  "author": "maruware <me@maruware.com>",
+  "license": "MIT"
+}
