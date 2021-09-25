@@ -6,34 +6,39 @@ import { Dimension, Video as _Video } from '../../components/Video'
 import { Canvas as _Canvas, Rect } from '../../components/Canvas'
 import { useMeasure } from 'react-use'
 
-const calcClipSize = (
+const calcClipPos = (
   boardWidth: number | undefined,
   boardHeight: number | undefined,
   videoWidth: number | undefined,
   videoHeight: number | undefined
 ) => {
   if (!boardWidth || !boardHeight) {
-    return {
-      clipWidth: undefined,
-      clipHeight: undefined,
-    }
+    return undefined
   }
   if (!videoWidth || !videoHeight)
     return {
-      clipWidth: boardWidth,
-      clipHeight: boardHeight,
+      left: 0,
+      top: 0,
+      width: boardWidth,
+      height: boardHeight,
     }
   // boardの方が横長
   if (boardWidth / boardHeight > videoWidth / videoHeight) {
+    const width = Math.floor((videoWidth * boardHeight) / videoHeight)
     return {
-      clipHeight: boardHeight,
-      clipWidth: Math.floor((videoWidth * boardHeight) / videoHeight),
+      left: Math.floor((boardWidth - width) / 2),
+      top: 0,
+      height: boardHeight,
+      width,
     }
     // boardの方が縦長
   } else {
+    const height = Math.floor((videoHeight * boardWidth) / videoWidth)
     return {
-      clipWidth: boardWidth,
-      clipHeight: Math.floor((videoHeight * boardWidth) / videoWidth),
+      left: 0,
+      top: Math.floor((boardHeight - height) / 2),
+      width: boardWidth,
+      height,
     }
   }
 }
@@ -66,8 +71,8 @@ export const Main: FC = () => {
   const [boardRef, { width: boardWidth, height: boardHeight }] =
     useMeasure<HTMLDivElement>()
 
-  const { clipWidth, clipHeight } = useMemo(
-    () => calcClipSize(boardWidth, boardHeight, videoWidth, videoHeight),
+  const clipPos = useMemo(
+    () => calcClipPos(boardWidth, boardHeight, videoWidth, videoHeight),
     [boardHeight, boardWidth, videoHeight, videoWidth]
   )
 
@@ -84,18 +89,22 @@ export const Main: FC = () => {
   return (
     <Container>
       <Board ref={boardRef}>
-        {clipWidth && clipHeight && (
+        {clipPos && (
           <>
             <Video
-              width={clipWidth}
-              height={clipHeight}
+              left={clipPos.left}
+              top={clipPos.top}
+              width={clipPos.width}
+              height={clipPos.height}
               sliderVal={sliderVal}
               src={videoSrc}
               onLoadedDimension={handleLoadedDimension}
             />
             <Canvas
-              width={clipWidth}
-              height={clipHeight}
+              left={clipPos.left}
+              top={clipPos.top}
+              width={clipPos.width}
+              height={clipPos.height}
               viewBox={viewBox}
               onRectFixed={handleRectFixed}
             />
@@ -135,14 +144,25 @@ const Container = styled.div`
   width: 100%;
 `
 
-const Video = styled(_Video)<{ width: number; height: number }>`
+type ClipPos = {
+  left: number
+  top: number
+  width: number
+  height: number
+}
+
+const Video = styled(_Video)<ClipPos>`
   position: absolute;
+  left: ${(props) => `${props.left}px`};
+  top: ${(props) => `${props.top}px`};
   width: ${(props) => `${props.width}px`};
   height: ${(props) => `${props.height}px`};
 `
 
-const Canvas = styled(_Canvas)<{ width: number; height: number }>`
+const Canvas = styled(_Canvas)<ClipPos>`
   position: absolute;
+  left: ${(props) => `${props.left}px`};
+  top: ${(props) => `${props.top}px`};
   width: ${(props) => `${props.width}px`};
   height: ${(props) => `${props.height}px`};
 `
