@@ -6,6 +6,7 @@ import { FileSelect } from '../../components/FileSelect'
 import { Dimension, Video as _Video } from '../../components/Video'
 import { Canvas as _Canvas, Rect } from '../../components/Canvas'
 import { useMeasure } from 'react-use'
+import { useDropzone } from 'react-dropzone'
 
 const calcClipPos = (
   boardWidth: number | undefined,
@@ -45,7 +46,7 @@ const calcClipPos = (
 }
 
 export const Main: FC = () => {
-  const [videoSrc, setVideoSrc] = useState('/BigBuckBunny.mp4')
+  const [videoSrc, setVideoSrc] = useState<string>()
   const [videoWidth, setVideoWidth] = useState<number>()
   const [videoHeight, setVideoHeight] = useState<number>()
   const handleLoadedDimension = (d: Dimension) => {
@@ -59,7 +60,7 @@ export const Main: FC = () => {
   }
 
   const [filename, setFilename] = useState('')
-  const handleClickFile = (file: File) => {
+  const handleOpenFile = (file: File) => {
     // reset
     setVideoWidth(undefined)
     setVideoHeight(undefined)
@@ -69,6 +70,19 @@ export const Main: FC = () => {
     setVideoSrc(url)
     setFilename(file.name)
   }
+
+  const handleDropFile = (acceptedFiles: File[]) => {
+    if (acceptedFiles.length === 0) {
+      setToast({ type: 'error', text: 'Bad file' })
+      return
+    }
+    const file = acceptedFiles[0]
+    handleOpenFile(file)
+  }
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    accept: 'video/*',
+    onDrop: handleDropFile,
+  })
 
   const [boardRef, { width: boardWidth, height: boardHeight }] =
     useMeasure<HTMLDivElement>()
@@ -99,35 +113,48 @@ export const Main: FC = () => {
   const handleCopyCmd = () => {
     if (ffmpegCmd) {
       navigator.clipboard.writeText(ffmpegCmd)
-      setToast({ text: 'Copied', type: 'success' })
+      setToast({ text: 'Copied!', type: 'success' })
     }
   }
 
   return (
     <Container>
-      <Board ref={boardRef}>
-        {clipPos && (
-          <>
-            <Video
-              left={clipPos.left}
-              top={clipPos.top}
-              width={clipPos.width}
-              height={clipPos.height}
-              sliderVal={sliderVal}
-              src={videoSrc}
-              onLoadedDimension={handleLoadedDimension}
-            />
-            <Canvas
-              left={clipPos.left}
-              top={clipPos.top}
-              width={clipPos.width}
-              height={clipPos.height}
-              viewBox={viewBox}
-              onRectFixed={handleRectFixed}
-            />
-          </>
-        )}
-      </Board>
+      <div {...getRootProps()}>
+        <input {...getInputProps()} />
+        <Board ref={boardRef}>
+          {!isDragActive && !videoSrc && (
+            <DropTxt>
+              <p>Drop one video file</p>
+            </DropTxt>
+          )}
+          {isDragActive && (
+            <DropTxt>
+              <p>Continue dropping ...</p>
+            </DropTxt>
+          )}
+          {!isDragActive && videoSrc && clipPos && (
+            <>
+              <Video
+                left={clipPos.left}
+                top={clipPos.top}
+                width={clipPos.width}
+                height={clipPos.height}
+                sliderVal={sliderVal}
+                src={videoSrc}
+                onLoadedDimension={handleLoadedDimension}
+              />
+              <Canvas
+                left={clipPos.left}
+                top={clipPos.top}
+                width={clipPos.width}
+                height={clipPos.height}
+                viewBox={viewBox}
+                onRectFixed={handleRectFixed}
+              />
+            </>
+          )}
+        </Board>
+      </div>
 
       <Controls>
         <VideoControl>
@@ -141,7 +168,7 @@ export const Main: FC = () => {
           />
         </VideoControl>
         <Buttons>
-          <FileSelect onOpen={handleClickFile} />
+          <FileSelect onOpen={handleOpenFile} />
         </Buttons>
         <FfmpegCmdArea>
           {ffmpegCmd && (
@@ -186,6 +213,24 @@ const Canvas = styled(_Canvas)<ClipPos>`
   top: ${(props) => `${props.top}px`};
   width: ${(props) => `${props.width}px`};
   height: ${(props) => `${props.height}px`};
+`
+
+const DropTxt = styled.div`
+  position: absolute;
+  left: 0;
+  top: 0;
+  text-align: center;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  p {
+    color: white;
+    font-size: 36px;
+    font-weight: 800;
+  }
 `
 
 const Controls = styled.div`
