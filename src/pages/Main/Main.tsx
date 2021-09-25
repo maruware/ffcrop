@@ -1,9 +1,9 @@
 import React, { FC, useMemo, useState } from 'react'
 import styled from 'styled-components'
-import { Slider } from '@geist-ui/react'
+import { Slider, Card } from '@geist-ui/react'
 import { FileSelect } from '../../components/FileSelect'
 import { Dimension, Video as _Video } from '../../components/Video'
-import { Canvas as _Canvas } from '../../components/Canvas'
+import { Canvas as _Canvas, Rect } from '../../components/Canvas'
 import { useMeasure } from 'react-use'
 
 const calcClipSize = (
@@ -52,6 +52,7 @@ export const Main: FC = () => {
     setSliderVal(val)
   }
 
+  const [filename, setFilename] = useState('')
   const handleClickFile = (file: File) => {
     // reset
     setVideoWidth(undefined)
@@ -59,6 +60,7 @@ export const Main: FC = () => {
 
     const url = URL.createObjectURL(file)
     setVideoSrc(url)
+    setFilename(file.name)
   }
 
   const [boardRef, { width: boardWidth, height: boardHeight }] =
@@ -74,6 +76,11 @@ export const Main: FC = () => {
     return `0, 0, ${videoWidth}, ${videoHeight}`
   }, [videoHeight, videoWidth])
 
+  const [rect, setRect] = useState<Rect>()
+  const handleRectFixed = (r: Rect) => {
+    setRect(r)
+  }
+
   return (
     <Container>
       <Board ref={boardRef}>
@@ -86,21 +93,40 @@ export const Main: FC = () => {
               src={videoSrc}
               onLoadedDimension={handleLoadedDimension}
             />
-            <Canvas width={clipWidth} height={clipHeight} viewBox={viewBox} />
+            <Canvas
+              width={clipWidth}
+              height={clipHeight}
+              viewBox={viewBox}
+              onRectFixed={handleRectFixed}
+            />
           </>
         )}
       </Board>
-      <VideoControl>
-        <Slider
-          hideValue
-          step={0.5}
-          max={100}
-          width="95%"
-          value={sliderVal}
-          onChange={handleChangeSlider}
-        />
-      </VideoControl>
-      <FileSelect onOpen={handleClickFile} />
+
+      <Controls>
+        <VideoControl>
+          <Slider
+            hideValue
+            step={0.5}
+            max={100}
+            value={sliderVal}
+            width="99%"
+            onChange={handleChangeSlider}
+          />
+        </VideoControl>
+        <Buttons>
+          <FileSelect onOpen={handleClickFile} />
+        </Buttons>
+        <FfmpegCmdArea>
+          {rect && (
+            <FfmpegCmdText>
+              {`ffmpeg -i ${filename || 'input'} -vf crop=x=${rect.x}:y=${
+                rect.y
+              }:w=${rect.width}:h=${rect.height} output`}
+            </FfmpegCmdText>
+          )}
+        </FfmpegCmdArea>
+      </Controls>
     </Container>
   )
 }
@@ -121,6 +147,10 @@ const Canvas = styled(_Canvas)<{ width: number; height: number }>`
   height: ${(props) => `${props.height}px`};
 `
 
+const Controls = styled.div`
+  padding: 16px;
+`
+
 const VideoControl = styled.div`
   display: flex;
   align-items: center;
@@ -132,5 +162,21 @@ const VideoControl = styled.div`
 const Board = styled.div`
   position: relative;
   width: 100%;
-  height: 600px;
+  height: 500px;
+  background-color: black;
 `
+
+const Buttons = styled.div`
+  margin-top: 16px;
+`
+
+const FfmpegCmdArea = styled(Card)`
+  margin-top: 16px !important;
+  /* border-radius: 4px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: black;
+  padding: 8px; */
+`
+
+const FfmpegCmdText = styled.p``
