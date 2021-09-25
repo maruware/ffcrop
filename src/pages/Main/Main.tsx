@@ -1,6 +1,7 @@
 import React, { FC, useMemo, useState } from 'react'
 import styled from 'styled-components'
-import { Slider, Card } from '@geist-ui/react'
+import { Slider, Card, Button, useToasts } from '@geist-ui/react'
+import { Copy as CopyIcon } from '@geist-ui/react-icons'
 import { FileSelect } from '../../components/FileSelect'
 import { Dimension, Video as _Video } from '../../components/Video'
 import { Canvas as _Canvas, Rect } from '../../components/Canvas'
@@ -62,6 +63,7 @@ export const Main: FC = () => {
     // reset
     setVideoWidth(undefined)
     setVideoHeight(undefined)
+    setRect(undefined)
 
     const url = URL.createObjectURL(file)
     setVideoSrc(url)
@@ -84,6 +86,21 @@ export const Main: FC = () => {
   const [rect, setRect] = useState<Rect>()
   const handleRectFixed = (r: Rect) => {
     setRect(r)
+  }
+
+  const ffmpegCmd = useMemo(() => {
+    if (!rect) return
+    return `ffmpeg -i ${filename || 'input'} -vf crop=x=${rect.x}:y=${
+      rect.y
+    }:w=${rect.width}:h=${rect.height} output`
+  }, [filename, rect])
+
+  const [, setToast] = useToasts()
+  const handleCopyCmd = () => {
+    if (ffmpegCmd) {
+      navigator.clipboard.writeText(ffmpegCmd)
+      setToast({ text: 'Copied', type: 'success' })
+    }
   }
 
   return (
@@ -127,12 +144,16 @@ export const Main: FC = () => {
           <FileSelect onOpen={handleClickFile} />
         </Buttons>
         <FfmpegCmdArea>
-          {rect && (
-            <FfmpegCmdText>
-              {`ffmpeg -i ${filename || 'input'} -vf crop=x=${rect.x}:y=${
-                rect.y
-              }:w=${rect.width}:h=${rect.height} output`}
-            </FfmpegCmdText>
+          {ffmpegCmd && (
+            <>
+              <FfmpegCmdText>{ffmpegCmd}</FfmpegCmdText>
+              <Button
+                iconRight={<CopyIcon />}
+                auto
+                scale={2 / 3}
+                onClick={handleCopyCmd}
+              />
+            </>
           )}
         </FfmpegCmdArea>
       </Controls>
@@ -192,6 +213,13 @@ const Buttons = styled.div`
 
 const FfmpegCmdArea = styled(Card)`
   margin-top: 16px !important;
+
+  .content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
   /* border-radius: 4px;
   border-style: solid;
   border-width: 1px;
@@ -199,4 +227,4 @@ const FfmpegCmdArea = styled(Card)`
   padding: 8px; */
 `
 
-const FfmpegCmdText = styled.p``
+const FfmpegCmdText = styled.span``

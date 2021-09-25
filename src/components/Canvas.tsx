@@ -64,6 +64,13 @@ export const Canvas: React.FC<CanvasProps> = ({
   const [endPt, setEndPt] = useState<Point>()
   const [rect, setRect] = useState<Rect>({ x: 0, y: 0, width: 0, height: 0 })
 
+  useEffect(() => {
+    // initialize
+    if (viewBox) {
+      setRect({ x: 0, y: 0, width: 0, height: 0 })
+    }
+  }, [viewBox])
+
   const handleMouseDown: React.MouseEventHandler<SVGSVGElement> = (ev) => {
     if (!svgRef.current) return
     if (!rectRef.current) return
