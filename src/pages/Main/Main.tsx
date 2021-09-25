@@ -6,6 +6,38 @@ import { Dimension, Video as _Video } from '../../components/Video'
 import { Canvas as _Canvas } from '../../components/Canvas'
 import { useMeasure } from 'react-use'
 
+const calcClipSize = (
+  boardWidth: number | undefined,
+  boardHeight: number | undefined,
+  videoWidth: number | undefined,
+  videoHeight: number | undefined
+) => {
+  if (!boardWidth || !boardHeight) {
+    return {
+      clipWidth: undefined,
+      clipHeight: undefined,
+    }
+  }
+  if (!videoWidth || !videoHeight)
+    return {
+      clipWidth: boardWidth,
+      clipHeight: boardHeight,
+    }
+  // boardの方が横長
+  if (boardWidth / boardHeight > videoWidth / videoHeight) {
+    return {
+      clipHeight: boardHeight,
+      clipWidth: Math.floor((videoWidth * boardHeight) / videoHeight),
+    }
+    // boardの方が縦長
+  } else {
+    return {
+      clipWidth: boardWidth,
+      clipHeight: Math.floor((videoHeight * boardWidth) / videoWidth),
+    }
+  }
+}
+
 export const Main: FC = () => {
   const [videoSrc, setVideoSrc] = useState('/BigBuckBunny.mp4')
   const [videoWidth, setVideoWidth] = useState<number>()
@@ -32,32 +64,10 @@ export const Main: FC = () => {
   const [boardRef, { width: boardWidth, height: boardHeight }] =
     useMeasure<HTMLDivElement>()
 
-  const { clipWidth, clipHeight } = useMemo(() => {
-    if (!boardWidth || !boardHeight) {
-      return {
-        clipWidth: undefined,
-        clipHeight: undefined,
-      }
-    }
-    if (!videoWidth || !videoHeight)
-      return {
-        clipWidth: boardWidth,
-        clipHeight: boardHeight,
-      }
-    // canvasの方が横長
-    if (boardWidth / boardHeight > videoWidth / videoHeight) {
-      return {
-        clipHeight: boardHeight,
-        clipWidth: Math.floor((videoWidth * boardHeight) / videoHeight),
-      }
-      // canvasの方が縦長
-    } else {
-      return {
-        clipWidth: boardWidth,
-        clipHeight: Math.floor((videoHeight * boardWidth) / videoWidth),
-      }
-    }
-  }, [boardHeight, boardWidth, videoHeight, videoWidth])
+  const { clipWidth, clipHeight } = useMemo(
+    () => calcClipSize(boardWidth, boardHeight, videoWidth, videoHeight),
+    [boardHeight, boardWidth, videoHeight, videoWidth]
+  )
 
   const viewBox = useMemo(() => {
     if (!videoWidth || !videoHeight) return undefined
