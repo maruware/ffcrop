@@ -23,13 +23,14 @@
   },
   "scripts": {
     "start": "cross-env BROWSER=none nf start -p 3000",
-    "build": "react-scripts build",
+    "build": "npm run react:build && npm run electron:build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "electron": "electron .",
-    "electron:build": "mkdir build/src && cp -r electron/. build/electron",
+    "electron:build": "cp -r electron/. build/electron",
     "electron:start": "node ./electron/wait-react",
     "react:start": "react-scripts start",
+    "react:build": "react-scripts build",
     "pack": "electron-builder --dir",
     "dist": "electron-builder -c.extraMetadata.main=build/electron/main.js"
   },
