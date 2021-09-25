@@ -25,7 +25,6 @@ export const FileSelect: React.FC<FileSelectProps> = ({ onOpen }) => {
         scale={2 / 3}
         iconRight={<FileIcon />}
         onClick={handleSelectFile}
-        htmlType="submit"
       />
       <InputFile ref={inputRef} accept="video/*" onChange={handleOpenFile} />
     </div>
