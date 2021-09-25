@@ -2,7 +2,7 @@
   "name": "crop-rect",
   "version": "0.1.0",
   "private": true,
-  "main": "./electron-starter.js",
+  "main": "electron/main.js",
   "dependencies": {
     "@geist-ui/react": "^2.2.0",
     "@geist-ui/react-icons": "^1.0.1",
@@ -27,8 +27,11 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "electron": "electron .",
-    "electron-start": "node ./electron-wait-react",
-    "react-start": "react-scripts start"
+    "electron:build": "mkdir build/src && cp -r electron/. build/electron",
+    "electron:start": "node ./electron/wait-react",
+    "react:start": "react-scripts start",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
   },
   "eslintConfig": {
     "extends": [
@@ -54,8 +57,16 @@
     "@typescript-eslint/parser": "^4.31.2",
     "cross-env": "^7.0.3",
     "electron": "^15.0.0",
+    "electron-builder": "^22.11.7",
     "eslint-config-prettier": "^8.3.0",
     "foreman": "^3.0.1",
     "prettier": "^2.4.1"
+  },
+  "build": {
+    "appId": "com.maruware.crop-rect",
+    "extends": null,
+    "files": [
+      "build/**/*"
+    ]
   }
 }
