@@ -2,13 +2,14 @@ import React, { FC, useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 import { Slider } from '@geist-ui/react'
 import { useThrottle } from 'react-use'
+import { FileSelect } from '../../components/FileSelect'
 
 const SLIDER_MAX = 100
 
 export const Main: FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null)
 
-  const [sliderVal, setSliderVal] = useState<number>(0)
+  const [sliderVal, setSliderVal] = useState<number>(1)
   const handleChangeSlider = (val: number) => {
     setSliderVal(val)
   }
@@ -17,10 +18,22 @@ export const Main: FC = () => {
   useEffect(() => {
     if (videoRef.current) {
       const duration = videoRef.current.duration
-      videoRef.current.currentTime =
-        (duration * throttledSliderVal) / SLIDER_MAX
+      const t = (duration * throttledSliderVal) / SLIDER_MAX
+      if (!t) {
+        videoRef.current.currentTime = 1
+        return
+      }
+      videoRef.current.currentTime = t
     }
   }, [throttledSliderVal])
+
+  const handleClickFile = (file: File) => {
+    const url = URL.createObjectURL(file)
+
+    if (videoRef.current) {
+      videoRef.current.src = url
+    }
+  }
 
   return (
     <Container>
@@ -35,6 +48,7 @@ export const Main: FC = () => {
           onChange={handleChangeSlider}
         />
       </VideoControl>
+      <FileSelect onOpen={handleClickFile} />
     </Container>
   )
 }
@@ -55,3 +69,5 @@ const VideoControl = styled.div`
   padding-top: 8px;
   padding-bottom: 8px;
 `
+
+const InputFileContainer = styled.label``
