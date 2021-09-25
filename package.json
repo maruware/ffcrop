@@ -31,7 +31,7 @@
     "electron:start": "node ./electron/wait-react",
     "react:start": "react-scripts start",
     "pack": "electron-builder --dir",
-    "dist": "electron-builder"
+    "dist": "electron-builder -c.extraMetadata.main=build/electron/main.js"
   },
   "eslintConfig": {
     "extends": [
