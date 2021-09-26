@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 import { useTheme } from '@geist-ui/react'
 
@@ -26,6 +26,65 @@ export const VideoSeekSlider: React.FC<VideoSeekSliderProps> = ({
 }) => {
   const { palette } = useTheme()
   const [showDetail, setShowDetail] = useState(false)
+  const seeking = useRef(false)
+  const barRef = useRef<HTMLDivElement>(null)
+
+  const calcCurrentTime = useCallback(
+    (pageX: number) => {
+      if (!barRef.current) return
+
+      const r = barRef.current.getBoundingClientRect()
+      let x = pageX - r.left
+      x = x < 0 ? 0 : x
+      x = x > r.width ? r.width : x
+
+      const ratio = x / r.width
+      const percent = (100 * x) / r.width
+      const t = duration * ratio
+      return {
+        percent,
+        currentTime: t,
+      }
+    },
+    [duration]
+  )
+
+  const handleWindowMouseMove = useCallback(
+    (ev: MouseEvent) => {
+      if (seeking.current) {
+        if (!barRef.current) return
+
+        const { percent, currentTime } = calcCurrentTime(ev.pageX)
+
+        onChange(currentTime)
+        setHoverPercent(percent)
+      }
+    },
+    [calcCurrentTime, onChange]
+  )
+
+  const handleWindowMouseUp = useCallback(
+    (ev: MouseEvent) => {
+      seeking.current = false
+
+      const { currentTime } = calcCurrentTime(ev.pageX)
+      onChange(currentTime)
+
+      setHoverPercent(undefined)
+    },
+    [calcCurrentTime, onChange]
+  )
+
+  useEffect(() => {
+    window.addEventListener('mousemove', handleWindowMouseMove)
+    window.addEventListener('mouseup', handleWindowMouseUp)
+
+    return () => {
+      window.removeEventListener('mousemove', handleWindowMouseMove)
+      window.removeEventListener('mouseup', handleWindowMouseUp)
+    }
+  }, [handleWindowMouseMove, handleWindowMouseUp])
+
   const handleMouseOver = () => {
     setShowDetail(true)
   }
@@ -38,7 +97,6 @@ export const VideoSeekSlider: React.FC<VideoSeekSliderProps> = ({
     const r = ev.currentTarget.getBoundingClientRect()
     const x = ev.clientX - r.left
     const percent = (100 * x) / r.width
-    console.log('percent', percent)
     setHoverPercent(percent)
   }
 
@@ -46,22 +104,19 @@ export const VideoSeekSlider: React.FC<VideoSeekSliderProps> = ({
     setHoverPercent(undefined)
   }
 
-  const handleClick: React.MouseEventHandler<HTMLDivElement> = (ev) => {
-    const r = ev.currentTarget.getBoundingClientRect()
-    const x = ev.clientX - r.left
-    const ratio = x / r.width
-    const t = duration * ratio
-    onChange(t)
+  const handleMouseDown: React.MouseEventHandler<HTMLDivElement> = () => {
+    seeking.current = true
   }
 
   return (
     <div>
       <Bar
+        ref={barRef}
         onMouseOver={handleMouseOver}
         onMouseOut={handleMouseOut}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
-        onClick={handleClick}
+        onMouseDown={handleMouseDown}
       >
         <BackgoundBar color={palette.accents_1} />
         <ForegroundBar
@@ -71,7 +126,7 @@ export const VideoSeekSlider: React.FC<VideoSeekSliderProps> = ({
         <Circle
           color={palette.successLight}
           percent={(100 * currentTime) / duration}
-          hide={!showDetail}
+          hide={!(showDetail || seeking.current)}
         />
         <Time
           txtColor={palette.accents_5}
