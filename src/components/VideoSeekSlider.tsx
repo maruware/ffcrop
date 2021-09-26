@@ -65,11 +65,12 @@ export const VideoSeekSlider: React.FC<VideoSeekSliderProps> = ({
 
   const handleWindowMouseUp = useCallback(
     (ev: MouseEvent) => {
+      if (seeking.current) {
+        const { currentTime } = calcCurrentTime(ev.pageX)
+        onChange(currentTime)
+      }
+
       seeking.current = false
-
-      const { currentTime } = calcCurrentTime(ev.pageX)
-      onChange(currentTime)
-
       setHoverPercent(undefined)
     },
     [calcCurrentTime, onChange]
@@ -118,7 +119,7 @@ export const VideoSeekSlider: React.FC<VideoSeekSliderProps> = ({
         onMouseLeave={handleMouseLeave}
         onMouseDown={handleMouseDown}
       >
-        <BackgoundBar color={palette.accents_1} />
+        <BackgoundBar color={palette.accents_2} />
         <ForegroundBar
           color={palette.successLight}
           percent={(100 * currentTime) / duration}
