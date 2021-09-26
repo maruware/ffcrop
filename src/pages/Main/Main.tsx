@@ -9,6 +9,12 @@ import { useMeasure } from 'react-use'
 import { useDropzone } from 'react-dropzone'
 import { VideoSeekSlider } from '../../components/VideoSeekSlider'
 
+declare global {
+  interface File {
+    path: string
+  }
+}
+
 const calcClipPos = (
   boardWidth: number | undefined,
   boardHeight: number | undefined,
@@ -63,7 +69,7 @@ export const Main: FC = () => {
     setCurrentTime(val)
   }
 
-  const [filename, setFilename] = useState('')
+  const [filepath, setFilepath] = useState('')
   const handleOpenFile = (file: File) => {
     // reset
     setVideoWidth(undefined)
@@ -72,7 +78,7 @@ export const Main: FC = () => {
 
     const url = URL.createObjectURL(file)
     setVideoSrc(url)
-    setFilename(file.name)
+    setFilepath(file.path)
   }
 
   const handleDropFile = (acceptedFiles: File[]) => {
@@ -109,10 +115,10 @@ export const Main: FC = () => {
 
   const ffmpegCmd = useMemo(() => {
     if (!rect) return
-    return `ffmpeg -i ${filename || 'input'} -vf crop=x=${rect.x}:y=${
+    return `ffmpeg -i ${filepath || 'input'} -vf crop=x=${rect.x}:y=${
       rect.y
     }:w=${rect.width}:h=${rect.height} output`
-  }, [filename, rect])
+  }, [filepath, rect])
 
   const [, setToast] = useToasts()
   const handleCopyCmd = () => {
