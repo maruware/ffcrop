@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
+import styled from 'styled-components'
 
 type CanvasProps = {
   className?: string
@@ -52,6 +53,15 @@ const calcRect = (s: Point, e: Point): Rect => {
   return rect
 }
 
+const rectIncludesPt = (rect: Rect, pt: Point) => {
+  return (
+    rect.x <= pt.x &&
+    rect.x + rect.width >= pt.x &&
+    rect.y <= pt.y &&
+    rect.y + rect.height >= pt.y
+  )
+}
+
 export const Canvas: React.FC<CanvasProps> = ({
   className,
   viewBox,
@@ -63,6 +73,8 @@ export const Canvas: React.FC<CanvasProps> = ({
   const [startPt, setStartPt] = useState<Point>()
   const [endPt, setEndPt] = useState<Point>()
   const [rect, setRect] = useState<Rect>({ x: 0, y: 0, width: 0, height: 0 })
+  const isMoveMode = useRef(false)
+  const startRect = useRef<Rect>()
 
   useEffect(() => {
     // initialize
@@ -81,7 +93,15 @@ export const Canvas: React.FC<CanvasProps> = ({
       ev.clientX,
       ev.clientY
     )
+    if (!pt) return
+
     setStartPt(pt)
+
+    const includes = rectIncludesPt(rect, pt)
+    isMoveMode.current = includes
+    if (includes) {
+      startRect.current = rect
+    }
   }
 
   const handleMouseMove: React.MouseEventHandler<SVGSVGElement> = (ev) => {
@@ -110,21 +130,48 @@ export const Canvas: React.FC<CanvasProps> = ({
       ev.clientY
     )
     if (!pt) return
-    const r = calcRect(startPt, pt)
 
-    onRectFixed(r)
+    let rect: Rect
+    if (!isMoveMode.current) {
+      rect = calcRect(startPt, pt)
+    } else {
+      if (!startRect.current) return
+      const dx = pt.x - startPt.x
+      const dy = pt.y - startPt.y
+      rect = {
+        ...startRect.current,
+        x: startRect.current.x + dx,
+        y: startRect.current.y + dy,
+      }
+    }
+    setRect(rect)
+    onRectFixed(rect)
+
     setStartPt(undefined)
     setEndPt(undefined)
+    isMoveMode.current = false
+    startRect.current = undefined
   }
 
   useEffect(() => {
     if (!startPt || !endPt) return
-    const r = calcRect(startPt, endPt)
-    setRect(r)
+    if (!isMoveMode.current) {
+      const r = calcRect(startPt, endPt)
+      setRect(r)
+    } else {
+      if (!startRect.current) return
+      const dx = endPt.x - startPt.x
+      const dy = endPt.y - startPt.y
+      setRect({
+        ...startRect.current,
+        x: startRect.current.x + dx,
+        y: startRect.current.y + dy,
+      })
+    }
   }, [startPt, endPt])
 
   return (
-    <svg
+    <Svg
       ref={svgRef}
       className={className}
       viewBox={viewBox}
@@ -138,10 +185,16 @@ export const Canvas: React.FC<CanvasProps> = ({
         y={rect.y}
         width={rect.width}
         height={rect.height}
-        fill="none"
+        fill="#0070f3"
+        fillOpacity={0.2}
         stroke="#0070f3"
         strokeWidth="5"
+        strokeOpacity={0.7}
       />
-    </svg>
+    </Svg>
   )
 }
+
+const Svg = styled.svg`
+  cursor: pointer;
+`
