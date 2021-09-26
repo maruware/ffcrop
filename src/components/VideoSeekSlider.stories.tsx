@@ -11,7 +11,7 @@ export default {
 
 const Template: ComponentStory<typeof VideoSeekSlider> = (args) => {
   const [currentTime, setCurrentTime] = useState(0)
-  const handleChange = (val) => {
+  const handleChange = (val: number) => {
     setCurrentTime(val)
   }
   return (

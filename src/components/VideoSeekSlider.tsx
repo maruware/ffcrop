@@ -52,12 +52,11 @@ export const VideoSeekSlider: React.FC<VideoSeekSliderProps> = ({
   const handleWindowMouseMove = useCallback(
     (ev: MouseEvent) => {
       if (seeking.current) {
-        if (!barRef.current) return
+        const r = calcCurrentTime(ev.pageX)
+        if (!r) return
 
-        const { percent, currentTime } = calcCurrentTime(ev.pageX)
-
-        onChange(currentTime)
-        setHoverPercent(percent)
+        onChange(r.currentTime)
+        setHoverPercent(r.percent)
       }
     },
     [calcCurrentTime, onChange]
@@ -66,8 +65,9 @@ export const VideoSeekSlider: React.FC<VideoSeekSliderProps> = ({
   const handleWindowMouseUp = useCallback(
     (ev: MouseEvent) => {
       if (seeking.current) {
-        const { currentTime } = calcCurrentTime(ev.pageX)
-        onChange(currentTime)
+        const r = calcCurrentTime(ev.pageX)
+        if (!r) return
+        onChange(r.currentTime)
       }
 
       seeking.current = false
@@ -110,7 +110,7 @@ export const VideoSeekSlider: React.FC<VideoSeekSliderProps> = ({
   }
 
   return (
-    <div>
+    <Container>
       <Bar
         ref={barRef}
         onMouseOver={handleMouseOver}
@@ -138,9 +138,13 @@ export const VideoSeekSlider: React.FC<VideoSeekSliderProps> = ({
             toTimeString((duration * hoverPercent) / 100)}
         </Time>
       </Bar>
-    </div>
+    </Container>
   )
 }
+
+const Container = styled.div`
+  width: 100%;
+`
 
 const BarBase = styled.div`
   height: 8px;
@@ -179,10 +183,10 @@ const Circle = styled.div<{ color: string; percent: number; hide?: boolean }>`
   transition-timing-function: ease-in;
 `
 
-const Time = styled.div<{ txtColor: string; percent: number; hide?: boolean }>`
+const Time = styled.div<{ txtColor: string; percent?: number; hide?: boolean }>`
   position: absolute;
   top: -18px;
-  left: ${({ percent }) => `calc(${percent}% - 24px)`};
+  left: ${({ percent }) => (percent ? `calc(${percent}% - 24px)` : 0)};
   width: 48px;
   height: 16px;
   border-radius: 6px;
