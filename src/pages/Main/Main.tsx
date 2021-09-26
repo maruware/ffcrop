@@ -52,6 +52,12 @@ const calcClipPos = (
   }
 }
 
+const outputFilename = (src: string, suffix: string) => {
+  const m = src.match(/(.+)[.]([^.]+)$/)
+  if (!m) return undefined
+  return m[1] + suffix + '.' + m[2]
+}
+
 export const Main: FC = () => {
   const [videoSrc, setVideoSrc] = useState<string>()
   const [videoWidth, setVideoWidth] = useState<number>()
@@ -115,9 +121,10 @@ export const Main: FC = () => {
 
   const ffmpegCmd = useMemo(() => {
     if (!rect) return
+    const output = outputFilename(filepath, '_cropped') || 'output'
     return `ffmpeg -i ${filepath || 'input'} -vf crop=x=${rect.x}:y=${
       rect.y
-    }:w=${rect.width}:h=${rect.height} output`
+    }:w=${rect.width}:h=${rect.height} ${output}`
   }, [filepath, rect])
 
   const [, setToast] = useToasts()
