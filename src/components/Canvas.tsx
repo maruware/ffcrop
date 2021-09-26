@@ -1,3 +1,4 @@
+import { useTheme } from '@geist-ui/react'
 import React, { useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 
@@ -67,6 +68,8 @@ export const Canvas: React.FC<CanvasProps> = ({
   viewBox,
   onRectFixed,
 }) => {
+  const { palette } = useTheme()
+
   const svgRef = useRef<SVGSVGElement>(null)
   const rectRef = useRef<SVGRectElement>(null)
 
@@ -147,6 +150,7 @@ export const Canvas: React.FC<CanvasProps> = ({
     setRect(rect)
     onRectFixed(rect)
 
+    // initialize
     setStartPt(undefined)
     setEndPt(undefined)
     isMoveMode.current = false
@@ -185,12 +189,26 @@ export const Canvas: React.FC<CanvasProps> = ({
         y={rect.y}
         width={rect.width}
         height={rect.height}
-        fill="#0070f3"
+        fill={palette.success}
         fillOpacity={0.2}
-        stroke="#0070f3"
+        stroke={palette.success}
         strokeWidth="5"
         strokeOpacity={0.7}
       />
+      {rect.width > 0 && rect.height > 0 && (
+        <text
+          x={rect.x + rect.width - 20}
+          y={rect.y + rect.height + 20}
+          fill={palette.successDark}
+          stroke="white"
+          strokeWidth={0.4}
+          strokeOpacity={0.7}
+          fontSize={18}
+          fontWeight={800}
+        >
+          {`${rect.width} x ${rect.height}`}
+        </text>
+      )}
     </Svg>
   )
 }
