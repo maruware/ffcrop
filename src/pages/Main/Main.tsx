@@ -1,12 +1,13 @@
 import React, { FC, useMemo, useState } from 'react'
 import styled from 'styled-components'
-import { Slider, Card, Button, useToasts } from '@geist-ui/react'
+import { Card, Button, useToasts } from '@geist-ui/react'
 import { Copy as CopyIcon } from '@geist-ui/react-icons'
 import { FileSelect } from '../../components/FileSelect'
-import { Dimension, Video as _Video } from '../../components/Video'
+import { Video as _Video, VideoMetadata } from '../../components/Video'
 import { Canvas as _Canvas, Rect } from '../../components/Canvas'
 import { useMeasure } from 'react-use'
 import { useDropzone } from 'react-dropzone'
+import { VideoSeekSlider } from '../../components/VideoSeekSlider'
 
 const calcClipPos = (
   boardWidth: number | undefined,
@@ -49,14 +50,17 @@ export const Main: FC = () => {
   const [videoSrc, setVideoSrc] = useState<string>()
   const [videoWidth, setVideoWidth] = useState<number>()
   const [videoHeight, setVideoHeight] = useState<number>()
-  const handleLoadedDimension = (d: Dimension) => {
+  const [duration, setDuration] = useState<number>()
+  const handleLoadedMetadata = (d: VideoMetadata) => {
     setVideoWidth(d.width)
     setVideoHeight(d.height)
+    console.log('duration', d.duration)
+    setDuration(d.duration)
   }
 
-  const [sliderVal, setSliderVal] = useState<number>(1)
-  const handleChangeSlider = (val: number) => {
-    setSliderVal(val)
+  const [currentTime, setCurrentTime] = useState<number>(0)
+  const handleChangeCurrentTime = (val: number) => {
+    setCurrentTime(val)
   }
 
   const [filename, setFilename] = useState('')
@@ -139,9 +143,9 @@ export const Main: FC = () => {
                 top={clipPos.top}
                 width={clipPos.width}
                 height={clipPos.height}
-                sliderVal={sliderVal}
+                currentTime={currentTime}
                 src={videoSrc}
-                onLoadedDimension={handleLoadedDimension}
+                onLoadedMetadata={handleLoadedMetadata}
               />
               <Canvas
                 left={clipPos.left}
@@ -158,14 +162,13 @@ export const Main: FC = () => {
 
       <Controls>
         <VideoControl>
-          <Slider
-            hideValue
-            step={0.5}
-            max={100}
-            value={sliderVal}
-            width="99%"
-            onChange={handleChangeSlider}
-          />
+          {duration && (
+            <VideoSeekSlider
+              duration={duration}
+              currentTime={currentTime}
+              onChange={handleChangeCurrentTime}
+            />
+          )}
         </VideoControl>
         <Buttons>
           <FileSelect onOpen={handleOpenFile} />
