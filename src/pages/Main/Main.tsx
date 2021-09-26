@@ -85,6 +85,7 @@ export const Main: FC = () => {
   }
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: 'video/*',
+    noClick: true,
     onDrop: handleDropFile,
   })
 
