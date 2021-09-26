@@ -25,7 +25,7 @@ export const VideoSeekSlider: React.FC<VideoSeekSliderProps> = ({
   onChange,
 }) => {
   const { palette } = useTheme()
-  const [showDetail, setShowDetail] = useState(false)
+  const [showCurrentPos, setShowCurrentPos] = useState(false)
   const seeking = useRef(false)
   const barRef = useRef<HTMLDivElement>(null)
 
@@ -87,10 +87,10 @@ export const VideoSeekSlider: React.FC<VideoSeekSliderProps> = ({
   }, [handleWindowMouseMove, handleWindowMouseUp])
 
   const handleMouseOver = () => {
-    setShowDetail(true)
+    setShowCurrentPos(true)
   }
   const handleMouseOut = () => {
-    setShowDetail(false)
+    setShowCurrentPos(false)
   }
 
   const [hoverPercent, setHoverPercent] = useState<number>()
@@ -127,7 +127,7 @@ export const VideoSeekSlider: React.FC<VideoSeekSliderProps> = ({
         <Circle
           color={palette.successLight}
           percent={(100 * currentTime) / duration}
-          hide={!(showDetail || seeking.current)}
+          hide={!(showCurrentPos || seeking.current)}
         />
         <Time
           txtColor={palette.accents_5}
