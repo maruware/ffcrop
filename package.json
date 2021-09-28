@@ -28,7 +28,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "electron": "electron .",
-    "electron:build": "cp -r electron/. build/electron",
+    "electron:build": "mkdir -p build/electron && cp -r electron/main.js build/electron/main.js",
     "electron:start": "node ./electron/wait-react",
     "react:start": "react-scripts start",
     "react:build": "react-scripts build",
