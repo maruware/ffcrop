@@ -4,18 +4,25 @@
   "description": "",
   "main": "dist/main.js",
   "scripts": {
-    "start": "run-s clean build serve",
+    "start": "electron-forge start",
     "clean": "rimraf dist",
     "build": "cross-env NODE_ENV=\"development\" webpack --progress",
     "serve": "electron .",
     "storybook": "start-storybook -p 6006",
-    "build-storybook": "build-storybook"
+    "build-storybook": "build-storybook",
+    "package": "electron-forge package",
+    "make": "electron-forge make"
   },
   "repository": "https://github.com/maruware/crop-rect",
   "author": "maruware <me@maruware.com>",
   "license": "MIT",
   "devDependencies": {
     "@babel/core": "^7.15.5",
+    "@electron-forge/cli": "^6.0.0-beta.61",
+    "@electron-forge/maker-deb": "^6.0.0-beta.61",
+    "@electron-forge/maker-rpm": "^6.0.0-beta.61",
+    "@electron-forge/maker-squirrel": "^6.0.0-beta.61",
+    "@electron-forge/maker-zip": "^6.0.0-beta.61",
     "@storybook/addon-actions": "^6.3.8",
     "@storybook/addon-essentials": "^6.3.8",
     "@storybook/addon-links": "^6.3.8",
@@ -48,10 +55,38 @@
   "dependencies": {
     "@geist-ui/react": "^2.2.0",
     "@geist-ui/react-icons": "^1.0.1",
+    "electron-squirrel-startup": "^1.0.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-dropzone": "^11.4.2",
     "react-use": "^17.3.1",
     "styled-components": "^5.3.1"
+  },
+  "config": {
+    "forge": {
+      "packagerConfig": {},
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "name": "crop_rect"
+          }
+        },
+        {
+          "name": "@electron-forge/maker-zip",
+          "platforms": [
+            "darwin"
+          ]
+        },
+        {
+          "name": "@electron-forge/maker-deb",
+          "config": {}
+        },
+        {
+          "name": "@electron-forge/maker-rpm",
+          "config": {}
+        }
+      ]
+    }
   }
 }
