@@ -7,12 +7,19 @@
     "start": "run-s clean build serve",
     "clean": "rimraf dist",
     "build": "cross-env NODE_ENV=\"development\" webpack --progress",
-    "serve": "electron ."
+    "serve": "electron .",
+    "storybook": "start-storybook -p 6006",
+    "build-storybook": "build-storybook"
   },
   "repository": "https://github.com/maruware/crop-rect",
   "author": "maruware <me@maruware.com>",
   "license": "MIT",
   "devDependencies": {
+    "@babel/core": "^7.15.5",
+    "@storybook/addon-actions": "^6.3.8",
+    "@storybook/addon-essentials": "^6.3.8",
+    "@storybook/addon-links": "^6.3.8",
+    "@storybook/react": "^6.3.8",
     "@types/mini-css-extract-plugin": "^2.3.0",
     "@types/node": "^16.10.1",
     "@types/react": "^17.0.24",
@@ -20,6 +27,7 @@
     "@types/styled-components": "^5.1.14",
     "@typescript-eslint/eslint-plugin": "^4.32.0",
     "@typescript-eslint/parser": "^4.32.0",
+    "babel-loader": "^8.2.2",
     "cross-env": "^7.0.3",
     "css-loader": "^6.3.0",
     "electron": "^15.0.0",
