@@ -101,8 +101,10 @@ export const Main: FC = () => {
     onDrop: handleDropFile,
   })
 
-  const [boardRef, { width: boardWidth, height: boardHeight }] =
-    useMeasure<HTMLDivElement>()
+  const [
+    boardRef,
+    { width: boardWidth, height: boardHeight },
+  ] = useMeasure<HTMLDivElement>()
 
   const clipPos = useMemo(
     () => calcClipPos(boardWidth, boardHeight, videoWidth, videoHeight),
@@ -174,19 +176,21 @@ export const Main: FC = () => {
         </Board>
       </div>
 
-      <Controls>
-        <VideoControl>
-          {duration && (
-            <VideoSeekSlider
-              duration={duration}
-              currentTime={currentTime}
-              onChange={handleChangeCurrentTime}
-            />
-          )}
-        </VideoControl>
-        <Buttons>
-          <FileSelect onOpen={handleOpenFile} />
-        </Buttons>
+      <Panel>
+        <Controls>
+          <Buttons>
+            <FileSelect onOpen={handleOpenFile} />
+          </Buttons>
+          <VideoControl>
+            {duration && (
+              <VideoSeekSlider
+                duration={duration}
+                currentTime={currentTime}
+                onChange={handleChangeCurrentTime}
+              />
+            )}
+          </VideoControl>
+        </Controls>
         <FfmpegCmdArea>
           {ffmpegCmd && (
             <>
@@ -200,7 +204,7 @@ export const Main: FC = () => {
             </>
           )}
         </FfmpegCmdArea>
-      </Controls>
+      </Panel>
     </Container>
   )
 }
@@ -250,16 +254,20 @@ const DropTxt = styled.div`
   }
 `
 
+const Panel = styled.div`
+  padding: 8px 16px;
+`
+
 const Controls = styled.div`
-  padding: 16px;
+  display: flex;
+  align-items: center;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  justify-content: stretch;
 `
 
 const VideoControl = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  padding-top: 8px;
-  padding-bottom: 8px;
+  width: 100%;
 `
 
 const Board = styled.div`
@@ -270,7 +278,7 @@ const Board = styled.div`
 `
 
 const Buttons = styled.div`
-  margin-top: 16px;
+  margin-right: 8px;
 `
 
 const FfmpegCmdArea = styled(Card)`
