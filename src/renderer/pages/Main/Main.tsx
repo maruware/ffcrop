@@ -1,17 +1,29 @@
-import React, { FC, useMemo, useState } from 'react'
+import React, { FC, useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
-import { Card, Button, useToasts } from '@geist-ui/react'
-import { Copy as CopyIcon } from '@geist-ui/react-icons'
+import { Card, useToasts } from '@geist-ui/react'
+import {
+  Clipboard as ClipboardIcon,
+  FileFunction as FileFunctionIcon,
+} from '@geist-ui/react-icons'
 import { FileSelect } from '../../components/FileSelect'
 import { Video as _Video, VideoMetadata } from '../../components/Video'
 import { Canvas as _Canvas, Rect } from '../../components/Canvas'
 import { useMeasure } from 'react-use'
 import { useDropzone } from 'react-dropzone'
 import { VideoSeekSlider } from '../../components/VideoSeekSlider'
+import { IconButton } from '../../components/IconButton'
+import { Console } from '../../components/Console'
 
 declare global {
   interface File {
     path: string
+  }
+  interface Window {
+    api: {
+      execFfmpeg(cmd: string): Promise<string>
+      // eslint-disable-next-line @typescript-eslint/ban-types
+      on(channel: string, fn: Function): void
+    }
   }
 }
 
@@ -124,7 +136,7 @@ export const Main: FC = () => {
   const ffmpegCmd = useMemo(() => {
     if (!rect) return
     const output = outputFilename(filepath, '_cropped') || 'output'
-    return `ffmpeg -i ${filepath || 'input'} -vf crop=x=${rect.x}:y=${
+    return `ffmpeg -y -i ${filepath || 'input'} -vf crop=x=${rect.x}:y=${
       rect.y
     }:w=${rect.width}:h=${rect.height} ${output}`
   }, [filepath, rect])
@@ -135,6 +147,20 @@ export const Main: FC = () => {
       navigator.clipboard.writeText(ffmpegCmd)
       setToast({ text: 'Copied!', type: 'success' })
     }
+  }
+
+  const [processOut, setProcessOut] = useState('')
+
+  useEffect(() => {
+    window.api.on('ffmpegOut', (o: string) => {
+      setProcessOut((prev) => prev + o)
+    })
+  }, [])
+
+  const handleExecCmd = async () => {
+    if (!ffmpegCmd) return
+    const r = await window.api.execFfmpeg(ffmpegCmd)
+    console.log(r)
   }
 
   return (
@@ -192,18 +218,22 @@ export const Main: FC = () => {
           </VideoControl>
         </Controls>
         <FfmpegCmdArea>
-          {ffmpegCmd && (
-            <>
-              <FfmpegCmdText>{ffmpegCmd}</FfmpegCmdText>
-              <Button
-                iconRight={<CopyIcon />}
-                auto
-                scale={2 / 3}
-                onClick={handleCopyCmd}
-              />
-            </>
-          )}
+          <FfmpegCmdText>{ffmpegCmd}</FfmpegCmdText>
+          <FfmpegButtons>
+            <IconButton
+              iconRight={<ClipboardIcon />}
+              onClick={handleCopyCmd}
+              disabled={!ffmpegCmd}
+            />
+            <IconButton
+              iconRight={<FileFunctionIcon />}
+              onClick={handleExecCmd}
+              disabled={!ffmpegCmd}
+            />
+          </FfmpegButtons>
         </FfmpegCmdArea>
+
+        <Console content={processOut} />
       </Panel>
     </Container>
   )
@@ -290,6 +320,8 @@ const FfmpegCmdArea = styled(Card)`
     justify-content: space-between;
   }
 
+  display: flex;
+
   /* border-radius: 4px;
   border-style: solid;
   border-width: 1px;
@@ -298,3 +330,7 @@ const FfmpegCmdArea = styled(Card)`
 `
 
 const FfmpegCmdText = styled.span``
+
+const FfmpegButtons = styled.div`
+  display: flex;
+`

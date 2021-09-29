@@ -1,6 +1,7 @@
 import os from 'os'
 import path from 'path'
-import { app, BrowserWindow, session } from 'electron'
+import { app, BrowserWindow, ipcMain, session } from 'electron'
+import { spawnFfmpeg } from './ffmpeg'
 
 const extPath =
   os.platform() === 'darwin'
@@ -65,3 +66,22 @@ app.whenReady().then(async () => {
 
 // すべてのウィンドウが閉じられたらアプリを終了する
 app.once('window-all-closed', () => app.quit())
+
+// ipc
+ipcMain.handle('execFfmpeg', (event, data) => {
+  return new Promise<void>((resolve, reject) => {
+    spawnFfmpeg(
+      data,
+      (out) => {
+        event.sender.send('ffmpegOut', out)
+      },
+      (code) => {
+        if (code === 0) {
+          resolve()
+        } else {
+          reject({ code })
+        }
+      }
+    )
+  })
+})
