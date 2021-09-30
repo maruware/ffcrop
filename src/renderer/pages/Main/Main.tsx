@@ -152,13 +152,15 @@ export const Main: FC = () => {
   const [processOut, setProcessOut] = useState('')
 
   useEffect(() => {
-    window.api.on('ffmpegOut', (o: string) => {
-      setProcessOut((prev) => prev + o)
+    window.api.on('ffmpegOut', (out: string) => {
+      const out_ = out.replace('\r', '\n')
+      setProcessOut((prev) => prev + out_)
     })
   }, [])
 
   const handleExecCmd = async () => {
     if (!ffmpegCmd) return
+    setProcessOut('')
     const r = await window.api.execFfmpeg(ffmpegCmd)
     console.log(r)
   }
