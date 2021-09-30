@@ -1,7 +1,7 @@
 {
   "name": "crop-rect",
   "version": "0.1.0",
-  "description": "",
+  "description": "Crop rect with ffmpeg",
   "main": "dist/main.js",
   "scripts": {
     "start": "run-s clean build serve",
