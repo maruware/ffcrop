@@ -332,9 +332,9 @@ const Buttons = styled.div`
 `
 
 const FfmpegCmdArea = styled.div`
-  margin-top: 8px !important;
+  margin-top: 16px;
   border-radius: 4px;
-  padding: 16px 8px;
+  padding: 8px;
   border-style: solid;
   border-color: #eaeaea;
   border-width: 1px;
