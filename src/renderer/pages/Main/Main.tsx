@@ -150,6 +150,7 @@ export const Main: FC = () => {
   }
 
   const [processOut, setProcessOut] = useState('')
+  const [processing, setProcessing] = useState(false)
 
   useEffect(() => {
     window.api.on('ffmpegOut', (out: string) => {
@@ -161,7 +162,9 @@ export const Main: FC = () => {
   const handleExecCmd = async () => {
     if (!ffmpegCmd) return
     setProcessOut('')
+    setProcessing(true)
     const r = await window.api.execFfmpeg(ffmpegCmd)
+    setProcessing(false)
     console.log(r)
   }
 
@@ -230,7 +233,7 @@ export const Main: FC = () => {
             <IconButton
               iconRight={<FileFunctionIcon />}
               onClick={handleExecCmd}
-              disabled={!ffmpegCmd}
+              disabled={!ffmpegCmd || processing}
             />
           </FfmpegButtons>
         </FfmpegCmdArea>
