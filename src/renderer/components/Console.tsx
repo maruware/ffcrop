@@ -23,4 +23,5 @@ const Pre = styled.div`
   white-space: pre-wrap;
   font-size: 12px;
   border-radius: 4px;
+  padding: 8px;
 `
