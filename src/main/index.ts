@@ -1,7 +1,7 @@
 import os from 'os'
 import path from 'path'
 import { app, BrowserWindow, ipcMain, session } from 'electron'
-import { spawnFfmpeg } from './ffmpeg'
+import { killFfmpeg, spawnFfmpeg } from './ffmpeg'
 
 const extPath =
   os.platform() === 'darwin'
@@ -54,4 +54,8 @@ ipcMain.handle('execFfmpeg', (event, data) => {
       }
     )
   })
+})
+
+ipcMain.handle('killFfmpeg', () => {
+  killFfmpeg()
 })

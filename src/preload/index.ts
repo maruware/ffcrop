@@ -1,8 +1,8 @@
 import { contextBridge, ipcRenderer } from 'electron'
 
 contextBridge.exposeInMainWorld('api', {
-  execFfmpeg: async (cmd: string) =>
-    await ipcRenderer.invoke('execFfmpeg', cmd),
+  execFfmpeg: (cmd: string) => ipcRenderer.invoke('execFfmpeg', cmd),
+  killFfmpeg: () => ipcRenderer.invoke('killFfmpeg'),
   //rendererでの受信用, funcはコールバック関数//
   // eslint-disable-next-line @typescript-eslint/ban-types
   on: (channel: string, fn: Function) => {

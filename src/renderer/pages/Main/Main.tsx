@@ -4,6 +4,7 @@ import { useToasts } from '@geist-ui/react'
 import {
   Clipboard as ClipboardIcon,
   FileFunction as FileFunctionIcon,
+  XCircle as KillIcon,
 } from '@geist-ui/react-icons'
 import { FileSelect } from '../../components/FileSelect'
 import { Video as _Video, VideoMetadata } from '../../components/Video'
@@ -12,7 +13,7 @@ import { useMeasure } from 'react-use'
 import { useDropzone } from 'react-dropzone'
 import { VideoSeekSlider } from '../../components/VideoSeekSlider'
 import { IconButton } from '../../components/IconButton'
-import { Console } from '../../components/Console'
+import { Console as _Console } from '../../components/Console'
 
 declare global {
   interface File {
@@ -21,6 +22,7 @@ declare global {
   interface Window {
     api: {
       execFfmpeg(cmd: string): Promise<string>
+      killFfmpeg(): Promise<void>
       // eslint-disable-next-line @typescript-eslint/ban-types
       on(channel: string, fn: Function): void
     }
@@ -168,6 +170,10 @@ export const Main: FC = () => {
     console.log(r)
   }
 
+  const handleKillProcess = async () => {
+    await window.api.killFfmpeg()
+  }
+
   return (
     <Container>
       <div {...getRootProps()}>
@@ -238,7 +244,18 @@ export const Main: FC = () => {
           </FfmpegButtons>
         </FfmpegCmdArea>
 
-        <Console content={processOut} />
+        <div>
+          <ConsoleWrapper>
+            <Console content={processOut} />
+            <ProcessKillButtonWrapper>
+              <ProcessKillButton
+                iconRight={<KillIcon />}
+                disabled={!processing}
+                onClick={handleKillProcess}
+              />
+            </ProcessKillButtonWrapper>
+          </ConsoleWrapper>
+        </div>
       </Panel>
     </Container>
   )
@@ -336,3 +353,23 @@ const FfmpegCmdText = styled.span`
 const FfmpegButtons = styled.div`
   display: flex;
 `
+
+const ConsoleWrapper = styled.div`
+  position: relative;
+  width: 100%;
+  height: 140px;
+`
+const Console = styled(_Console)`
+  position: absolute;
+  width: 100%;
+`
+
+const ProcessKillButtonWrapper = styled.div`
+  position: absolute;
+  bottom: 20px;
+  right: 30px;
+`
+
+const ProcessKillButton = styled(IconButton).attrs({
+  type: 'error',
+})``
