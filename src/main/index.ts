@@ -41,18 +41,14 @@ app.once('window-all-closed', () => app.quit())
 
 // ipc
 ipcMain.handle('execFfmpeg', (event, data) => {
-  return new Promise<void>((resolve, reject) => {
+  return new Promise<{ code: number | null }>((resolve) => {
     spawnFfmpeg(
       data,
       (out) => {
         event.sender.send('ffmpegOut', out)
       },
       (code) => {
-        if (code === 0) {
-          resolve()
-        } else {
-          reject({ code })
-        }
+        resolve({ code })
       }
     )
   })
