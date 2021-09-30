@@ -36,4 +36,8 @@ jobs:
       
       - run: yarn install --frozen-lockfile
       - run: yarn release
-      - run: ls out/make
+      - name: upload artifact
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            out/make/*
