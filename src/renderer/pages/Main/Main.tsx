@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
-import { Card, useToasts } from '@geist-ui/react'
+import { useToasts } from '@geist-ui/react'
 import {
   Clipboard as ClipboardIcon,
   FileFunction as FileFunctionIcon,
@@ -296,8 +296,6 @@ const Panel = styled.div`
 const Controls = styled.div`
   display: flex;
   align-items: center;
-  padding-top: 8px;
-  padding-bottom: 8px;
   justify-content: stretch;
 `
 
@@ -308,7 +306,7 @@ const VideoControl = styled.div`
 const Board = styled.div`
   position: relative;
   width: 100%;
-  height: 500px;
+  height: 440px;
   background-color: black;
 `
 
@@ -316,25 +314,24 @@ const Buttons = styled.div`
   margin-right: 8px;
 `
 
-const FfmpegCmdArea = styled(Card)`
-  margin-top: 16px !important;
-
-  .content {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
+const FfmpegCmdArea = styled.div`
+  margin-top: 8px !important;
+  border-radius: 4px;
+  padding: 16px 8px;
+  border-style: solid;
+  border-color: #eaeaea;
+  border-width: 1px;
 
   display: flex;
+  align-items: center;
+  justify-content: space-between;
 
-  /* border-radius: 4px;
-  border-style: solid;
-  border-width: 1px;
-  border-color: black;
-  padding: 8px; */
+  display: flex;
 `
 
-const FfmpegCmdText = styled.span``
+const FfmpegCmdText = styled.span`
+  font-size: 14px;
+`
 
 const FfmpegButtons = styled.div`
   display: flex;

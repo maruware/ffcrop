@@ -17,7 +17,7 @@ export const Console: React.FC<ConsoleProps> = ({ content }) => {
 const Pre = styled.div`
   background-color: black;
   color: white;
-  height: 160px;
+  height: 140px;
   overflow-y: scroll;
   overflow-x: auto;
   white-space: pre-wrap;

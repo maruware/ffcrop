@@ -10,6 +10,8 @@ const extPath =
 
 const createWindow = () => {
   const mainWindow = new BrowserWindow({
+    width: 1024,
+    height: 768,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
