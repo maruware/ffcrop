@@ -9,6 +9,9 @@
         "strict": true,
         "sourceMap": true
     },
+    "include": [
+        "src/**/*"
+    ],
     "ts-node": {
         "compilerOptions": {
             "target": "es2015",
