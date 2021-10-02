@@ -9,7 +9,7 @@
     "build": "cross-env NODE_ENV=\"development\" webpack --progress",
     "watch": "cross-env NODE_ENV=\"development\" webpack --watch",
     "dev": "concurrently npm:watch npm:serve",
-    "copy-icons": "cpx icons/* dist",
+    "copy-icons": "cpx 'icons/*' dist",
     "serve": "electron .",
     "storybook": "start-storybook -p 6006",
     "build:production": "cross-env NODE_ENV=\"production\" webpack",
@@ -72,7 +72,7 @@
   "config": {
     "forge": {
       "packagerConfig": {
-        "icon": "app.icns"
+        "icon": "icons/app.icns"
       },
       "makers": [
         {
