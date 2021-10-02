@@ -1,5 +1,5 @@
 {
-  "name": "crop-rect",
+  "name": "ffcrop",
   "version": "0.1.4",
   "description": "Crop rect with ffmpeg",
   "main": "dist/main.js",
@@ -18,7 +18,7 @@
     "make": "electron-forge make",
     "release": "run-s clean copy-icons build:production make"
   },
-  "repository": "https://github.com/maruware/crop-rect",
+  "repository": "https://github.com/maruware/ffcrop",
   "author": "maruware <me@maruware.com>",
   "license": "MIT",
   "devDependencies": {
@@ -78,7 +78,7 @@
         {
           "name": "@electron-forge/maker-squirrel",
           "config": {
-            "name": "crop_rect"
+            "name": "ffcrop"
           }
         },
         {
