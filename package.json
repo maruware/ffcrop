@@ -1,6 +1,6 @@
 {
   "name": "ffcrop",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Crop rect with ffmpeg",
   "main": "dist/main.js",
   "private": true,
